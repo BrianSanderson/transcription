@@ -1,5 +1,23 @@
 ## Conversion of XML audio transcription files to data tables
 
+### Contents
+
+1. [README.md](https://github.com/BrianSanderson/transcription/blob/master/README.md) this file
+
+2. [trsConvert.py](https://github.com/BrianSanderson/transcription/blob/master/trsConvert.py) Python 2.7 script that performs the conversion of Transcriber XML files to a data frame
+
+3. [exampleTranscription.trs](https://github.com/BrianSanderson/transcription/blob/master/exampleTranscription.trs) An example of audio file transcription from Transcriber
+
+4. [exampleLayout.txt](https://github.com/BrianSanderson/transcription/blob/master/exampleLayout.txt) An example of the exclosure layout file
+
+5. [exampleOutput.tsv](https://github.com/BrianSanderson/transcription/blob/master/exampleOutput.tsv) An example of the output of the Python script
+
+### Usage 
+
+`python trsConvert.py --input inputTrsFile.trs --layout exclosureLayoutFile.txt --output outputDataFrame.tsv`
+
+### Notes
+
 In my dissertation research I recorded audio observations of pollinator 
 behaviors, which resulted in a set of ~200 audio files. I used the program
 [Transcriber](http://trans.sourceforge.net/en/presentation.php) to transcribe
@@ -21,7 +39,7 @@ I used the following codes when transcribing the audio files:
 * The following observations for that insect contain involved an ethogram of behaviors 
     * "search" refers to when the insect was moving around the exclosure, but not near any particular plant
     * "scan" refers to when the insect was close to, but not touching, the flowers of a specific plant. These records include the plant number (e.g. p18 for the plant in position 18).
-    * "land" refers to when the insect actually landed on a flower. These recorsd also include the plant number
+    * "land" refers to when the insect actually landed on a flower. These records also include the plant number
     * "exit" refers to when the insect left the exclosure
 
 * Records of the form "!C" refer to the time when the observer moved to a different corner of the exclosure
@@ -29,7 +47,7 @@ I used the following codes when transcribing the audio files:
 Each record has a time stamp associated with it in the output .trs XML file.
 These files are convenient because they are linked to the source MP3 and so
 you can refer to the annotations later and easily play the audio to ensure
-that the transcription was accurate..
+that the transcription was accurate.
 
 Transcription resulted in a set of ~200 XML files, which was not an
 especially useful format for data analysis.
@@ -48,19 +66,3 @@ observation period which is convenient for downstream analysis.
 These data will be part of a forthcoming manuscript. It's not clear to me
 that the script will be useful to anyone other than myself, but I share it
 here in the interest of reproducibility and transparency.
-
-### Contents
-
-1. [README.md](https://github.com/BrianSanderson/transcription/blob/master/README.md) this file
-
-2. [trsConvert.py](https://github.com/BrianSanderson/transcription/blob/master/trsConvert.py) Python 2.7 script that performs the conversion of Transcriber XML files to a data frame
-
-3. [exampleTranscription.trs](https://github.com/BrianSanderson/transcription/blob/master/exampleTranscription.trs) An example of audio file transcription from Transcriber
-
-4. [exampleLayout.txt](https://github.com/BrianSanderson/transcription/blob/master/exampleLayout.txt) An example of the exclosure layout file
-
-5. [exampleOutput.tsv](https://github.com/BrianSanderson/transcription/blob/master/exampleOutput.tsv) An example of the output of the Python script
-
-### Usage 
-
-`python trsConvert.py --input inputTrsFile.trs --layout exclosureLayoutFile.txt --output outputDataFrame.tsv`
