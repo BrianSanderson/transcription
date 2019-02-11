@@ -1,9 +1,8 @@
-#!/usr/bin/python2.7
-
 from bs4 import BeautifulSoup
 import argparse
 import csv
 import re
+
 
 def main():
     '''
@@ -16,23 +15,21 @@ def main():
     soup = BeautifulSoup(open(args.input))
     metaDict = {}
     insectDict = {}
-    ofile = open(args.output, 'wb')
-    writer = csv.writer(ofile,delimiter='\t')
+    ofile = open(args.output, 'w')
+    writer = csv.writer(ofile, delimiter='\t')
 
-    headerLine = ['observer', 'date', 'time', 'exclosure', 'corner',
-                  'insectType', 'insectGroup', 'timeStamp', 'behavior',
-                  'plant', 'position', 'maleFlowers', 'femaleFlowers', 'notes']
+    headerLine = ['observer', 'date', 'time', 'exclosure', 'corner','insectType', 'insectGroup', 'timeStamp', 'behavior','plant', 'position', 'maleFlowers', 'femaleFlowers', 'notes']
     writer.writerow(headerLine)
 
     ex1, ex2, ex3 = process_layout(args.layout)
-    
-    for Sync in soup.find_all(name = 'sync'):
+
+    for Sync in soup.find_all(name='sync'):
         # If the line contains metadata, extract it
         if re.search(r'\[*\]', Sync.next_element):
             if re.search(r'\[end\]', Sync.next_element):
-                a = 1
+                continue
             elif re.search(r'\[END\]', Sync.next_element):
-                a = 1
+                continue
             else:
                 metaDict = meta_data(Sync.next_element)
         # If the line begins with !, update corner
@@ -73,7 +70,7 @@ def main():
                              metaDict['corner'], insectType, insectGroup,
                              Sync['time'], 'exit', 'NA', 'NA', 'NA', 'NA',
                              commentSearch])
-            
+
         # If the line begins with scan, print out the scan data
         elif re.search(r'scan\s', Sync.next_element):
             commentLine, pos, plant, insectType, insectGroup, males, females = find_behavior(
@@ -91,11 +88,11 @@ def main():
                              metaDict['time'], metaDict['exclosure'],
                              metaDict['corner'], insectType, insectGroup,
                              Sync['time'], 'land', plant, pos, males, females,
-                             commentLine])            
-        # Otherwise, wtf?
+                             commentLine])
+        # Otherwise, do nothing
         else:
             continue
-        
+
 
 def process_layout(layoutFile):
     '''
@@ -169,7 +166,6 @@ def find_search(soupLine, insectDict):
     Read in line containing searching behavior, return the
     insect type, group, and any comments
     '''
-    behaviorLine = re.sub(r'\(.*?\)', '', soupLine).strip('\n')
     insectType = insectDict[re.search(r'i[0-9]+',
                                       soupLine).group(0).strip('\n')]
     insectGroup = re.search(r'i[0-9]+',
@@ -186,7 +182,7 @@ def find_search(soupLine, insectDict):
 def find_behavior(soupLine, metaDict, insectDict, ex1, ex2, ex3):
     '''
     Read in line containing positional behavior, return
-    any comment, plant position, insect type, and insect group 
+    any comment, plant position, insect type, and insect group
     '''
     try:
         commentLine = re.search(r'\((.+?)\)',
@@ -221,15 +217,15 @@ def find_behavior(soupLine, metaDict, insectDict, ex1, ex2, ex3):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description = 'a script to convert the '
+    parser = argparse.ArgumentParser(description='a script to convert the '
                                      'audio transcriptions of pollinator '
                                      'behavior into long form data frame')
-    parser.add_argument('-i', dest = 'input', metavar = 'example.trs',
-                        help = '.trs input file', required = True)
-    parser.add_argument('-o', dest = 'output', metavar = 'example.csv',
-                        help = '.csv output file', required = True)
-    parser.add_argument('-l', dest = 'layout', metavar = 'layout.txt',
-                        help = 'tab-delimited exclosoure layout file',
-                        required = True)
+    parser.add_argument('-i', dest='input', metavar='example.trs',
+                        help='.trs input file', required=True)
+    parser.add_argument('-o', dest='output', metavar='example.csv',
+                        help='.csv output file', required=True)
+    parser.add_argument('-l', dest='layout', metavar='layout.txt',
+                        help='tab-delimited exclosoure layout file',
+                        required=True)
     args = parser.parse_args()
     main()
