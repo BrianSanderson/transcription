@@ -23,11 +23,18 @@ behaviors, which resulted in a set of ~200 audio files. I used the program
 [Transcriber](http://trans.sourceforge.net/en/presentation.php) to transcribe
 the audio files.
 
-For this experiment I placed 24 plants in a square deer exclosure and
-narrated the behavior of insects as they moved among the plants. Every
-ten minutes the observer would move to a different corner of the exclosure
-(A, B, C, or D) to minimize observation bias of the plants closest to where
-the observer was standing.
+Transcription resulted in a set of ~200 XML files, which was not an
+especially useful format for data analysis.
+I wrote this Python script to convert the XML output from Transcriber
+into a data frame that would be useful for downstream analysis. The
+script uses the [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) XML parser for Python.
+
+Before describing the required inputs for this script, it is worth providing
+some context about the experiment. For this experiment I placed 24 plants in a
+square deer exclosure and narrated the behavior of insects as they moved among
+the plants. Every ten minutes the observer would move to a different corner of
+the exclosure (A, B, C, or D) to minimize observation bias of the plants
+closest to where the observer was standing.
 
 I used the following codes when transcribing the audio files:
 
@@ -48,12 +55,6 @@ Each record has a time stamp associated with it in the output .trs XML file.
 These files are convenient because they are linked to the source MP3 and so
 you can refer to the annotations later and easily play the audio to ensure
 that the transcription was accurate.
-
-Transcription resulted in a set of ~200 XML files, which was not an
-especially useful format for data analysis.
-I wrote this Python script to convert the XML output from Transcriber
-into a data frame that would be useful for downstream analysis. The
-script uses the [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) XML parser for Python.
 
 The script requires an XML .trs file from Transcriber, as well as an exclosure
 layout file that describes which plants were in which position in the
