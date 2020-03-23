@@ -153,82 +153,83 @@ if __name__ == '__main__':
     soup = BeautifulSoup(open(args.input), "html.parser")
     metaDict = {}
     insectDict = {}
-    ofile = open(args.output, 'w')
-    writer = csv.writer(ofile, delimiter='\t')
+    with open(args.output, 'w', newline='\n') as csvfile:
+        writer = csv.writer(csvfile, delimiter='\t',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        headerLine = ['observer', 'date', 'time', 'exclosure', 'corner',
+                      'insectType', 'insectGroup', 'timeStamp', 'behavior',
+                      'plant', 'position', 'maleFlowers', 'femaleFlowers',
+                      'notes']
+        writer.writerow(headerLine)
 
-    headerLine = ['observer', 'date', 'time', 'exclosure', 'corner',
-                  'insectType', 'insectGroup', 'timeStamp', 'behavior',
-                  'plant', 'position', 'maleFlowers', 'femaleFlowers', 'notes']
-    writer.writerow(headerLine)
+        ex1, ex2, ex3 = process_layout(args.layout)
 
-    ex1, ex2, ex3 = process_layout(args.layout)
+        for Sync in soup.find_all(name='sync'):
+            # If the line contains metadata, extract it
+            if re.search(r'\[*\]', Sync.next_element):
+                if re.search(r'\[end\]', Sync.next_element):
+                    continue
+                elif re.search(r'\[END\]', Sync.next_element):
+                    continue
+                else:
+                    metaDict = meta_data(Sync.next_element)
+            # If the line begins with !, update corner
+            elif re.search(r'!', Sync.next_element):
+                corner = meta_data_update(Sync.next_element)
+                metaDict['corner'] = corner
+            # If the line begins with i, extract insect data
+            elif re.search(r'i*:', Sync.next_element):
+                currentIndex, currentPol, polComment = insect_data(
+                    Sync.next_element)
+                insectDict[currentIndex] = currentPol
+            # If the line begins with search, print out the search data
+            elif re.search(r'search', Sync.next_element):
+                insectType, insectGroup, commentSearch = find_search(
+                    Sync.next_element, insectDict)
+                writer.writerow([metaDict['observer'], metaDict['date'],
+                                 metaDict['time'], metaDict['exclosure'],
+                                 metaDict['corner'], insectType, insectGroup,
+                                 Sync['time'], 'search', 'NA', 'NA', 'NA',
+                                 'NA', commentSearch])
 
-    for Sync in soup.find_all(name='sync'):
-        # If the line contains metadata, extract it
-        if re.search(r'\[*\]', Sync.next_element):
-            if re.search(r'\[end\]', Sync.next_element):
-                continue
-            elif re.search(r'\[END\]', Sync.next_element):
-                continue
+            # If the line contains exit, print out a terminal line
+            elif re.search(r'exit', Sync.next_element):
+                insectType, insectGroup, commentSearch = find_search(
+                    Sync.next_element, insectDict)
+                writer.writerow([metaDict['observer'], metaDict['date'],
+                                 metaDict['time'], metaDict['exclosure'],
+                                 metaDict['corner'], insectType, insectGroup,
+                                 Sync['time'], 'exit', 'NA', 'NA', 'NA', 'NA',
+                                 commentSearch])
+
+            # If the line contains exit, print out a terminal line
+            elif re.search(r'lost', Sync.next_element):
+                insectType, insectGroup, commentSearch = find_search(
+                    Sync.next_element, insectDict)
+                writer.writerow([metaDict['observer'], metaDict['date'],
+                                 metaDict['time'], metaDict['exclosure'],
+                                 metaDict['corner'], insectType, insectGroup,
+                                 Sync['time'], 'exit', 'NA', 'NA', 'NA', 'NA',
+                                 commentSearch])
+
+            # If the line begins with scan, print out the scan data
+            elif re.search(r'scan\s', Sync.next_element):
+                commentLine, pos, plant, insectType, insectGroup, males, females = find_behavior(
+                    Sync.next_element, metaDict, insectDict, ex1, ex2, ex3)
+                writer.writerow([metaDict['observer'], metaDict['date'],
+                                 metaDict['time'], metaDict['exclosure'],
+                                 metaDict['corner'], insectType, insectGroup,
+                                 Sync['time'], 'scan', plant, pos, males, females,
+                                 commentLine])
+            # If the line begins with land, print out the land data
+            elif re.search(r'land\s', Sync.next_element):
+                commentLine, pos, plant, insectType, insectGroup, males, females = find_behavior(
+                    Sync.next_element, metaDict, insectDict, ex1, ex2, ex3)
+                writer.writerow([metaDict['observer'], metaDict['date'],
+                                 metaDict['time'], metaDict['exclosure'],
+                                 metaDict['corner'], insectType, insectGroup,
+                                 Sync['time'], 'land', plant, pos, males, females,
+                                 commentLine])
+            # Otherwise, do nothing
             else:
-                metaDict = meta_data(Sync.next_element)
-        # If the line begins with !, update corner
-        elif re.search(r'!', Sync.next_element):
-            corner = meta_data_update(Sync.next_element)
-            metaDict['corner'] = corner
-        # If the line begins with i, extract insect data
-        elif re.search(r'i*:', Sync.next_element):
-            currentIndex, currentPol, polComment = insect_data(
-                Sync.next_element)
-            insectDict[currentIndex] = currentPol
-        # If the line begins with search, print out the search data
-        elif re.search(r'search', Sync.next_element):
-            insectType, insectGroup, commentSearch = find_search(
-                Sync.next_element, insectDict)
-            writer.writerow([metaDict['observer'], metaDict['date'],
-                             metaDict['time'], metaDict['exclosure'],
-                             metaDict['corner'], insectType, insectGroup,
-                             Sync['time'], 'search', 'NA', 'NA', 'NA', 'NA',
-                             commentSearch])
-
-        # If the line contains exit, print out a terminal line
-        elif re.search(r'exit', Sync.next_element):
-            insectType, insectGroup, commentSearch = find_search(
-                Sync.next_element, insectDict)
-            writer.writerow([metaDict['observer'], metaDict['date'],
-                             metaDict['time'], metaDict['exclosure'],
-                             metaDict['corner'], insectType, insectGroup,
-                             Sync['time'], 'exit', 'NA', 'NA', 'NA', 'NA',
-                             commentSearch])
-
-        # If the line contains exit, print out a terminal line
-        elif re.search(r'lost', Sync.next_element):
-            insectType, insectGroup, commentSearch = find_search(
-                Sync.next_element, insectDict)
-            writer.writerow([metaDict['observer'], metaDict['date'],
-                             metaDict['time'], metaDict['exclosure'],
-                             metaDict['corner'], insectType, insectGroup,
-                             Sync['time'], 'exit', 'NA', 'NA', 'NA', 'NA',
-                             commentSearch])
-
-        # If the line begins with scan, print out the scan data
-        elif re.search(r'scan\s', Sync.next_element):
-            commentLine, pos, plant, insectType, insectGroup, males, females = find_behavior(
-                Sync.next_element, metaDict, insectDict, ex1, ex2, ex3)
-            writer.writerow([metaDict['observer'], metaDict['date'],
-                             metaDict['time'], metaDict['exclosure'],
-                             metaDict['corner'], insectType, insectGroup,
-                             Sync['time'], 'scan', plant, pos, males, females,
-                             commentLine])
-        # If the line begins with land, print out the land data
-        elif re.search(r'land\s', Sync.next_element):
-            commentLine, pos, plant, insectType, insectGroup, males, females = find_behavior(
-                Sync.next_element, metaDict, insectDict, ex1, ex2, ex3)
-            writer.writerow([metaDict['observer'], metaDict['date'],
-                             metaDict['time'], metaDict['exclosure'],
-                             metaDict['corner'], insectType, insectGroup,
-                             Sync['time'], 'land', plant, pos, males, females,
-                             commentLine])
-        # Otherwise, do nothing
-        else:
-            continue
+                continue
